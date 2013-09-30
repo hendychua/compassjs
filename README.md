@@ -6,8 +6,8 @@ This is a project for CS3213 Software Systems Design.
 
 Team members:
 ============
-Hendy Chua
-Inian
-Zaki
-Edrick
-Ivan
+Hendy Chua<br>
+Inian<br>
+Zaki<br>
+Edrick<br>
+Ivan<br>
