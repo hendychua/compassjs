@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Test</title>
+	<meta name="author" content="Hendy Chua">
+	<script src="jquery-1.10.2.js" type="text/javascript"></script>
+	<script type="text/javascript" src="model.js"></script>
+</head>
+<body>
+    <h3>Turn on your console to see the requests and responses</h3>
+    <p>
+        <form enctype="multipart/form-data" name="movie">
+            <input type="text" required="true" size="30" name="movie[title]" id="movie_title" class="text_field"><br>
+            <input type="text" required="true" size="30" name="movie[summary]" id="movie_summary" class="text_field"><br>
+            <input type="file" required="true" name="movie[img]" id="movie_img"><br>
+            <a id="createMovieLink" href="#">Click to see an example of CREATING a movie (You must fill in the form first)</a>
+        </form>
+    </p>
+    <p>
+        <a id="updateMoveLink" href="#">Click to see an example of UPDATING a movie</a>
+    </p>
+    <p>
+        <a id="deleteMovieLink" href="#">Click to see an example of DELETING a movie</a>
+    </p>
+<script type="text/javascript">
+
+    var access_token = '1bb65cc2683d304ba9490b41fb635212'; // replace with your own access token
+    
+    // example: instantiating a movie model
+    var Movie = Compass.Model;
+    Movie.prototype = new Compass.ModelBase("http://cs3213.herokuapp.com/movies");
+     
+    // example: getting a movie
+    var foo = new Movie;
+    foo.get("4.json");
+    console.log(foo);
+
+    // example: creating a new movie using FormData
+    //          we can also create using normal key-value pairs
+    //          but for this example, we will show using form since we are uploading an image
+    $("#createMovieLink").click(function() {
+        var newMovie = new Movie;
+        var formData = new FormData($("form[name='movie']")[0]);
+        formData.append('access_token', access_token);
+        newMovie.obj.formData = formData;
+        newMovie.save("http://cs3213.herokuapp.com/movies.json");
+        console.log(newMovie);
+    });
+    
+    // example: updating a movie using key-value pairs
+    //          similar to create, we can also update using FormData
+    //          but for this example, we will show using key-value pairs
+    //          note that you can only update the movie that you are authorized to do so
+    $("#updateMoveLink").click(function() {
+        var movieToBeUpdated = new Movie;
+        movieToBeUpdated.get("381.json"); // replace with an id of a movie that you are authorized to update
+        movieToBeUpdated.obj['access_token'] = access_token;
+        movieToBeUpdated.obj['movie[title]'] = 'UNIQUE !!!!!'; // make sure the title is unique
+        movieToBeUpdated.obj['movie[summary]'] = 'dance dance woooh oooh';
+        movieToBeUpdated.sync("", movieToBeUpdated.obj.id+".json");
+    });    
+
+    // example: deleting a movie
+    //          note that you can only delete the movie that you are authorized to do so
+    $("#deleteMovieLink").click(function() {
+        var movieToBeDeleted = new Movie;
+        movieToBeDeleted.get("381.json"); // replace with an id of a movie that you are authorized to update
+        movieToBeDeleted.obj['access_token'] = access_token;
+        movieToBeDeleted.destroy("", movieToBeDeleted.obj.id+".json");
+    });
+    
+</script>
+</body>
+</html>
