@@ -26,16 +26,15 @@
     </p>
 <script type="text/javascript">
 
-    var access_token = '1bb65cc2683d304ba9490b41fb635212'; // replace with your own access token
+    var access_token = '43abe400645e3e75ab86bd04aa11a250'; // replace with your own access token
     
     // example: instantiating a movie model
-    var Movie = Compass.Model;
-    Movie.prototype = new Compass.ModelBase("http://cs3213.herokuapp.com/movies");
+    var Movie = function(){};
+    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
      
     // example: getting a movie
     var foo = new Movie;
     foo.get("4.json");
-    console.log(foo);
 
     // example: creating a new movie using FormData
     //          we can also create using normal key-value pairs
@@ -70,6 +69,19 @@
         movieToBeDeleted.obj['access_token'] = access_token;
         movieToBeDeleted.destroy("", movieToBeDeleted.obj.id+".json");
     });
+    
+    // example: instantiating a movies collection with the Movie model as the model in the collection
+    var Movies = function(){};
+    Movies.prototype = new Compass.Collection(Movie);
+    
+    var listOfMovies = new Movies;
+    var additionalParams = {
+        page: 2
+    };
+    // if the url is different from the model url, we can just provide the custom url when calling get
+    // leave the customUrl to null if you want to use the model url
+    listOfMovies.get("http://cs3213.herokuapp.com/movies.json", additionalParams);
+    console.log(listOfMovies);
     
 </script>
 </body>

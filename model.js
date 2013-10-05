@@ -1,8 +1,36 @@
 var Compass = function() {};
 
-var Model = Compass.Model = function(){};
+var Collection = Compass.Collection = function(model) {
+    this.model = function(){};
+    this.model.prototype = model.prototype;
+    this.list = [];
+    this.get = function(customUrl, additionalParams) {
+        var useUrl = this.model.url;
+        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
+            useUrl = customUrl;
+        }
+        $.ajax({
+            async: false,
+            url: useUrl,
+            type: 'get', 
+            data: additionalParams,
+            context: this,
+            error: function(jqxhr, textStatus, error) {
+                console.log("error: "+error);
+            },
+            success: function(data, textStatus, jqxhr) {
+                for (var i in data) {
+                    var datum = data[i];
+                    var model = new this.model;
+                    model.obj = datum;
+                    this.list.push(model);
+                }
+            }
+        });
+    };
+}
 
-var ModelBase = Compass.ModelBase = function(url) {
+var Model = Compass.Model = function(url) {
     this.url = url;
     this.obj = {};
     this.get = function(id) {
@@ -21,7 +49,7 @@ var ModelBase = Compass.ModelBase = function(url) {
     };
     this.save = function(customUrl) {
         var useUrl = this.url;
-        if (typeof customUrl != "undefined") {
+        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
             useUrl = customUrl;
         }
         // allow user to post with files with FormData
@@ -64,7 +92,7 @@ var ModelBase = Compass.ModelBase = function(url) {
     };
     this.sync = function(customUrl, endpointId) {
         var useUrl = this.url;
-        if (typeof customUrl != "undefined" && customUrl != "") {
+        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
@@ -109,7 +137,7 @@ var ModelBase = Compass.ModelBase = function(url) {
     };
     this.destroy = function(customUrl, endpointId) {
         var useUrl = this.url;
-        if (typeof customUrl != "undefined" && customUrl != "") {
+        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
