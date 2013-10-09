@@ -26,7 +26,7 @@
     </p>
 <script type="text/javascript">
 
-    var access_token = '43abe400645e3e75ab86bd04aa11a250'; // replace with your own access token
+    var access_token = 'c2dee760d14ce04bc4e88a43a678d5d2'; // replace with your own access token
     
     // example: instantiating a movie model
     var Movie = function(){};
@@ -34,7 +34,13 @@
      
     // example: getting a movie
     var foo = new Movie;
-    foo.get("4.json");
+    foo.get({
+        id: "4.json",
+        success: function(data) {
+            console.log("Get successful");
+            console.log(data);
+        }
+    });
 
     // example: creating a new movie using FormData
     //          we can also create using normal key-value pairs
@@ -44,30 +50,59 @@
         var formData = new FormData($("form[name='movie']")[0]);
         formData.append('access_token', access_token);
         newMovie.obj.formData = formData;
-        newMovie.save("http://cs3213.herokuapp.com/movies.json");
-        console.log(newMovie);
+        newMovie.save({
+            customUrl: "http://cs3213.herokuapp.com/movies.json",
+            success: function(data) {
+                console.log("Post successful");
+                console.log(data);
+            }
+        });
     });
     
-    // example: updating a movie using key-value pairs
-    //          similar to create, we can also update using FormData
-    //          but for this example, we will show using key-value pairs
-    //          note that you can only update the movie that you are authorized to do so
+    // // example: updating a movie using key-value pairs
+    // //          similar to create, we can also update using FormData
+    // //          but for this example, we will show using key-value pairs
+    // //          note that you can only update the movie that you are authorized to do so
     $("#updateMoveLink").click(function() {
         var movieToBeUpdated = new Movie;
-        movieToBeUpdated.get("381.json"); // replace with an id of a movie that you are authorized to update
-        movieToBeUpdated.obj['access_token'] = access_token;
-        movieToBeUpdated.obj['movie[title]'] = 'UNIQUE !!!!!'; // make sure the title is unique
-        movieToBeUpdated.obj['movie[summary]'] = 'dance dance woooh oooh';
-        movieToBeUpdated.sync("", movieToBeUpdated.obj.id+".json");
+        movieToBeUpdated.get({
+            id: "383.json", // replace with an id of a movie that you are authorized to update
+            success: function(data) {
+                console.log("Get successful");
+                console.log(data);
+                movieToBeUpdated.obj['access_token'] = access_token;
+                movieToBeUpdated.obj['movie[title]'] = 'HEE HEHHE UNIQUE !!!!!'; // make sure the title is unique
+                movieToBeUpdated.obj['movie[summary]'] = 'dance dance woooh oooh';
+                movieToBeUpdated.sync({
+                    id: movieToBeUpdated.obj.id+".json",
+                    success: function(data) {
+                        console.log("Update successful");
+                        console.log(data);
+                    } 
+                });
+            }
+        });
     });    
-
-    // example: deleting a movie
-    //          note that you can only delete the movie that you are authorized to do so
+    
+    // // example: deleting a movie
+    // //          note that you can only delete the movie that you are authorized to do so
     $("#deleteMovieLink").click(function() {
         var movieToBeDeleted = new Movie;
-        movieToBeDeleted.get("381.json"); // replace with an id of a movie that you are authorized to update
-        movieToBeDeleted.obj['access_token'] = access_token;
-        movieToBeDeleted.destroy("", movieToBeDeleted.obj.id+".json");
+        movieToBeDeleted.get({
+            id: "383.json", // replace with an id of a movie that you are authorized to delete
+            success: function(data) {
+                console.log("Get successful");
+                console.log(data);
+                movieToBeDeleted.obj['access_token'] = access_token;
+                movieToBeDeleted.destroy({
+                    id: movieToBeDeleted.obj.id+".json",
+                    success: function(data) {
+                        console.log("Delete successful");
+                        console.log(data);                
+                    }
+                });
+            }
+        });
     });
     
     // example: instantiating a movies collection with the Movie model as the model in the collection
@@ -76,12 +111,17 @@
     
     var listOfMovies = new Movies;
     var additionalParams = {
-        page: 2
+        page: 6
     };
     // if the url is different from the model url, we can just provide the custom url when calling get
-    // leave the customUrl to null if you want to use the model url
-    listOfMovies.get("http://cs3213.herokuapp.com/movies.json", additionalParams);
-    console.log(listOfMovies);
+    listOfMovies.get({
+        customUrl: "http://cs3213.herokuapp.com/movies.json",
+        additionalParams: additionalParams,
+        success: function(data) {
+            console.log("Get collections successful");
+            console.log(data);            
+        }
+    });
     
 </script>
 </body>

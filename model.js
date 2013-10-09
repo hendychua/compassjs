@@ -1,16 +1,30 @@
 var Compass = function() {};
 
+var View = Compass.View = function(template) {
+    this.model = null;
+    this.template = template;
+    this.bindModel = function(model) {
+        this.model = model;
+    },
+    this.render = function() {
+        var template = _.template(this.template.html(), {model: this.model});
+        return template;
+    }
+}
+
 var Collection = Compass.Collection = function(model) {
     this.model = function(){};
     this.model.prototype = model.prototype;
     this.list = [];
-    this.get = function(customUrl, additionalParams) {
+    this.get = function(params) {
+        var customUrl = params.customUrl;
+        var additionalParams = params.additionalParams;
+        var callback = params.success;
         var useUrl = this.model.url;
-        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
+        if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         $.ajax({
-            async: false,
             url: useUrl,
             type: 'get', 
             data: additionalParams,
@@ -25,6 +39,7 @@ var Collection = Compass.Collection = function(model) {
                     model.obj = datum;
                     this.list.push(model);
                 }
+                callback(this.list);
             }
         });
     };
@@ -33,9 +48,10 @@ var Collection = Compass.Collection = function(model) {
 var Model = Compass.Model = function(url) {
     this.url = url;
     this.obj = {};
-    this.get = function(id) {
+    this.get = function(params) {
+        var id = params.id;
+        var callback = params.success;
         $.ajax({
-            async: false,
             url: this.url+"/"+id,
             type: 'get',
             context: this,
@@ -44,12 +60,15 @@ var Model = Compass.Model = function(url) {
             },
             success: function(data, textStatus, jqxhr) {
                 this.obj = data;
+                callback(data);
             }
         });                        
     };
-    this.save = function(customUrl) {
+    this.save = function(params) {
+        var customUrl = params.customUrl;
+        var callback = params.success;
         var useUrl = this.url;
-        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
+        if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         // allow user to post with files with FormData
@@ -59,7 +78,6 @@ var Model = Compass.Model = function(url) {
         if (this.obj.formData instanceof FormData) {
             $.ajax({
                 type: 'post',
-                async: false,
                 url: useUrl,
                 context: this,
                 data: this.obj.formData,
@@ -71,6 +89,7 @@ var Model = Compass.Model = function(url) {
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
                     this.obj.formData = null;
+                    callback(data);
                 }
             });
         } else {
@@ -85,14 +104,18 @@ var Model = Compass.Model = function(url) {
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
+                    callback(data);
                 }
             });
             
         }
     };
-    this.sync = function(customUrl, endpointId) {
+    this.sync = function(params) {
+        var customUrl = params.customUrl;
+        var endpointId = params.id;        
+        var callback = params.success;
         var useUrl = this.url;
-        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
+        if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
@@ -107,7 +130,6 @@ var Model = Compass.Model = function(url) {
         if (this.obj.formData instanceof FormData) {
             $.ajax({
                 type: 'put',
-                async: false,
                 url: useUrl,
                 context: this,
                 data: this.obj.formData,
@@ -118,12 +140,12 @@ var Model = Compass.Model = function(url) {
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj.formData = null;
+                    callback(data);
                 }
             });
         } else {
             $.ajax({
                 type: 'put',
-                async: false,
                 url: useUrl,
                 context: this,
                 data: this.obj,
@@ -131,13 +153,17 @@ var Model = Compass.Model = function(url) {
                     console.log("error: "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
+                    callback(data);
                 }
             });
         }
     };
-    this.destroy = function(customUrl, endpointId) {
+    this.destroy = function(params) {
+        var customUrl = params.customUrl;
+        var endpointId = params.id;        
+        var callback = params.success;
         var useUrl = this.url;
-        if (typeof customUrl != "undefined" && customUrl != "" && customUrl != null) {
+        if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
@@ -150,7 +176,6 @@ var Model = Compass.Model = function(url) {
         } else {
             $.ajax({
                 type: 'delete',
-                async: false,
                 url: useUrl,
                 context: this,
                 data: this.obj,
@@ -159,6 +184,7 @@ var Model = Compass.Model = function(url) {
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = {};
+                    callback(data);
                 }
             });
         }
