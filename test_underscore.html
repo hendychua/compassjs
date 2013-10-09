@@ -57,6 +57,8 @@
     
     var secondMovie = new Movie;
     var secondMovieView = new SingleMovieView;
+    // this example shows how a user can override the render function in the View object
+    // to suit what he wants.
     secondMovieView.render = function() {
         var template = _.template(this.template.html(), {model: this.model});
         $("#special").append(template);
