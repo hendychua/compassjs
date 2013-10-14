@@ -1,5 +1,82 @@
 var Compass = function() {};
 
+// Cached regular expressions for matching named param parts and splatted
+// parts of route strings.
+var optionalParam = /\((.*?)\)/g;
+var namedParam    = /(\(\?)?:\w+/g;
+var splatParam    = /\*\w+/g;
+var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+function _routeToRegExp(route) {
+     route = route.replace(escapeRegExp, '\\$&')
+                  .replace(optionalParam, '(?:$1)?')
+                  .replace(namedParam, function(match, optional){
+                    return optional ? match : '([^\/]+)';
+                  })
+                  .replace(splatParam, '(.*?)');
+     return new RegExp('^' + route + '$');
+}
+
+function _extractParameters(originalRoute, currentRoute) {
+    // a simplistic way to split url and extract params
+    // whatever starts with ":" is treated as a param
+    var originalTokens = originalRoute.split("/");
+    var currentTokens = currentRoute.split("/");
+    var params = {};
+    for (var i in originalTokens) {
+        if (originalTokens[i][0] == ":") {
+            params[originalTokens[i].substring(1)] = currentTokens[i];
+        }
+    }
+    return params;
+}
+
+function _routeWithInstance(routerInstance) {
+    var chosenHandlerName= null;
+    var originalRoute = null;
+    for (var i in routerInstance.routesRegex) {
+        if (routerInstance.routesRegex[i].test(routerInstance.currentHash) == true) {
+            chosenHandlerName = routerInstance.handlerName[i];
+            originalRoute = routerInstance.originalRoutes[i];
+            break;
+        }
+    }
+    if (chosenHandlerName != null) {
+        var handler = routerInstance.handlers[chosenHandlerName];
+        var params = _extractParameters(originalRoute, routerInstance.currentHash);
+        handler(params);
+    }
+}
+
+var Router = Compass.Router = function(routes) {
+    this.currentHash = window.location.hash.substring(1);
+    this.originalRoutes = [];
+    this.handlerName = [];
+    this.handlers = routes.handlers;
+    this.routesRegex = [];
+    for (var key in routes.routes) {
+        this.handlerName.push(routes.routes[key]);
+        this.originalRoutes.push(key);
+        var regex = _routeToRegExp(key);
+        this.routesRegex.push(regex);
+    }
+    this.start = function() {
+        var rb = new RouterBack();
+        rb.checkUrl(this);
+    }
+}
+
+var RouterBack = function() {
+    this.checkUrl = function(appRouterInstance) {
+        window.setInterval(function() {
+            if (appRouterInstance.currentHash != window.location.hash.substring(1)) {
+                appRouterInstance.currentHash = window.location.hash.substring(1);
+                _routeWithInstance(appRouterInstance);
+            }
+        }, 100);
+    }
+}
+
 var View = Compass.View = function(template) {
     this.model = null;
     this.template = template;
