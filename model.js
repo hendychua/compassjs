@@ -12,6 +12,34 @@ var View = Compass.View = function(template) {
     }
 }
 
+var Events = Compass.Events = function() {
+    this.bind = function (params, callback) {
+        var eventName = params.eventName;
+        var event = {callback: callback};
+        if (typeof this._events == "undefined") {
+            this._events = {};
+        }
+        if (typeof this._events[eventName] == "undefined") {
+            this._events[eventName] = [];
+        }
+        var events = this._events[eventName];
+        events.push(event);
+        return this; // returning this to facilitate chaining
+    };
+
+    //name of event to trigger
+    this.trigger = function (params) {
+        if (!this._events) return this;
+        var events = this._events[params.eventName];
+        //trigger events
+        var i;
+        for (i = 0; i < events.length; i++) {
+            events[i].callback();
+        }
+        return this;
+    };
+}
+
 var Collection = Compass.Collection = function(model) {
     this.model = function(){};
     this.model.prototype = model.prototype;
