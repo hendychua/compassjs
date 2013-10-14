@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Test</title>
+	<meta name="author" content="Hendy Chua">
+	<script src="jquery-1.10.2.js" type="text/javascript"></script>
+	<script type="text/javascript" src="model.js"></script>
+</head>
+<body>
+	hi there
+	<script type="text/javascript">
+	var obj = {};
+	obj.prototype = new Compass.Events();
+	obj.prototype.bind("myEvent", function () { console.log("event triggered!!!");});
+
+	setTimeout(function() {obj.prototype.trigger("myEvent")}, 4000);
+	</script>
+</body>
+</html>
