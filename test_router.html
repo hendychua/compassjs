@@ -10,29 +10,47 @@
 	<script type="text/javascript" src="model.js"></script>    
 </head>
 <body>
-
-<script type="text/javascript">
-var AppRouter = new Compass.Router({
-    routes: {
-        "" : "index",
-        "movies/:id" : "view_movie",
-        "movies/:id/reviews/:rid" : "view_movie_review",
-    },
-    handlers: {
-        index: function() {
-           console.log("index");
-        },
-        view_movie: function(params) {
-            console.log("view movie id ",params.id);
-        },
-        view_movie_review: function(params) {
-            console.log("view movie id "+params.id+" review "+params.rid);
-        }
-    }
-});
-AppRouter.handlers.index();
-AppRouter.start();
-</script>
-
+    <script type="text/template" id="single-movie-template">
+        <h3><%= model.title %></h3>
+        <h6><%= model.summary %></h6>
+        <img src="<%= model.img_url %>">
+    </script>
 </body>
+<script type="text/javascript">
+    var Movie = function(){};
+    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+
+    var SingleMovieView = function(){};
+    SingleMovieView.prototype = new Compass.View($("#single-movie-template"));
+
+    var AppRouter = new Compass.Router({
+        routes: {
+            "" : "index",
+            "movies/:id" : "view_movie",
+            "movies/:id/reviews/:rid" : "view_movie_review",
+        },
+        handlers: {
+            index: function() {
+               console.log("index");
+            },
+            view_movie: function(params) {
+                // console.log("view movie id ",params.id);
+                var firstMovie = new Movie;
+                var firstMovieView = new SingleMovieView;
+                firstMovie.get({
+                    id: params.id+".json",
+                    success: function(data) {
+                        firstMovieView.bindModel(data);
+                        $("body").append(firstMovieView.render());        
+                    }
+                });
+            },
+            view_movie_review: function(params) {
+                console.log("view movie id "+params.id+" with review "+params.rid);
+            }
+        }
+    });
+    AppRouter.handlers.index();
+    AppRouter.start();
+</script>
 </html>

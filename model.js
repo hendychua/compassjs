@@ -17,39 +17,7 @@ function _routeToRegExp(route) {
      return new RegExp('^' + route + '$');
 }
 
-function _extractParameters(originalRoute, currentRoute) {
-    // a simplistic way to split url and extract params
-    // whatever starts with ":" is treated as a param
-    var originalTokens = originalRoute.split("/");
-    var currentTokens = currentRoute.split("/");
-    var params = {};
-    for (var i in originalTokens) {
-        if (originalTokens[i][0] == ":") {
-            params[originalTokens[i].substring(1)] = currentTokens[i];
-        }
-    }
-    return params;
-}
-
-function _routeWithInstance(routerInstance) {
-    var chosenHandlerName= null;
-    var originalRoute = null;
-    for (var i in routerInstance.routesRegex) {
-        if (routerInstance.routesRegex[i].test(routerInstance.currentHash) == true) {
-            chosenHandlerName = routerInstance.handlerName[i];
-            originalRoute = routerInstance.originalRoutes[i];
-            break;
-        }
-    }
-    if (chosenHandlerName != null) {
-        var handler = routerInstance.handlers[chosenHandlerName];
-        var params = _extractParameters(originalRoute, routerInstance.currentHash);
-        handler(params);
-    }
-}
-
 var Router = Compass.Router = function(routes) {
-    this.currentHash = window.location.hash.substring(1);
     this.originalRoutes = [];
     this.handlerName = [];
     this.handlers = routes.handlers;
@@ -61,19 +29,39 @@ var Router = Compass.Router = function(routes) {
         this.routesRegex.push(regex);
     }
     this.start = function() {
-        var rb = new RouterBack();
-        rb.checkUrl(this);
-    }
-}
-
-var RouterBack = function() {
-    this.checkUrl = function(appRouterInstance) {
-        window.setInterval(function() {
-            if (appRouterInstance.currentHash != window.location.hash.substring(1)) {
-                appRouterInstance.currentHash = window.location.hash.substring(1);
-                _routeWithInstance(appRouterInstance);
+        var appRouterInstance = this;
+        $(window).on("hashchange", function() {
+            appRouterInstance._route();
+        })
+    },
+    this._route = function () {
+        var chosenHandlerName= null;
+        var originalRoute = null;
+        for (var i in this.routesRegex) {
+            if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
+                chosenHandlerName = this.handlerName[i];
+                originalRoute = this.originalRoutes[i];
+                break;
             }
-        }, 100);
+        }
+        if (chosenHandlerName != null) {
+            var handler = this.handlers[chosenHandlerName];
+            var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
+            handler(params);
+        }
+    },
+    this._extractParameters = function (originalRoute, currentRoute) {
+        // a simplistic way to split url and extract params
+        // whatever starts with ":" is treated as a param
+        var originalTokens = originalRoute.split("/");
+        var currentTokens = currentRoute.split("/");
+        var params = {};
+        for (var i in originalTokens) {
+            if (originalTokens[i][0] == ":") {
+                params[originalTokens[i].substring(1)] = currentTokens[i];
+            }
+        }
+        return params;
     }
 }
 
