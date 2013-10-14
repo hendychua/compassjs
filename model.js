@@ -1,5 +1,70 @@
 var Compass = function() {};
 
+// Cached regular expressions for matching named param parts and splatted
+// parts of route strings.
+var optionalParam = /\((.*?)\)/g;
+var namedParam    = /(\(\?)?:\w+/g;
+var splatParam    = /\*\w+/g;
+var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+function _routeToRegExp(route) {
+     route = route.replace(escapeRegExp, '\\$&')
+                  .replace(optionalParam, '(?:$1)?')
+                  .replace(namedParam, function(match, optional){
+                    return optional ? match : '([^\/]+)';
+                  })
+                  .replace(splatParam, '(.*?)');
+     return new RegExp('^' + route + '$');
+}
+
+var Router = Compass.Router = function(routes) {
+    this.originalRoutes = [];
+    this.handlerName = [];
+    this.handlers = routes.handlers;
+    this.routesRegex = [];
+    for (var key in routes.routes) {
+        this.handlerName.push(routes.routes[key]);
+        this.originalRoutes.push(key);
+        var regex = _routeToRegExp(key);
+        this.routesRegex.push(regex);
+    }
+    this.start = function() {
+        var appRouterInstance = this;
+        $(window).on("hashchange", function() {
+            appRouterInstance._route();
+        })
+    },
+    this._route = function () {
+        var chosenHandlerName= null;
+        var originalRoute = null;
+        for (var i in this.routesRegex) {
+            if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
+                chosenHandlerName = this.handlerName[i];
+                originalRoute = this.originalRoutes[i];
+                break;
+            }
+        }
+        if (chosenHandlerName != null) {
+            var handler = this.handlers[chosenHandlerName];
+            var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
+            handler(params);
+        }
+    },
+    this._extractParameters = function (originalRoute, currentRoute) {
+        // a simplistic way to split url and extract params
+        // whatever starts with ":" is treated as a param
+        var originalTokens = originalRoute.split("/");
+        var currentTokens = currentRoute.split("/");
+        var params = {};
+        for (var i in originalTokens) {
+            if (originalTokens[i][0] == ":") {
+                params[originalTokens[i].substring(1)] = currentTokens[i];
+            }
+        }
+        return params;
+    }
+}
+
 var View = Compass.View = function(template) {
     this.model = null;
     this.template = template;
