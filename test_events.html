@@ -12,7 +12,7 @@
 	hi there
 	<script type="text/javascript">
 	var obj = {};
-	obj.prototype = new Compass.Events();
+	obj.prototype = Compass.Events;
 	obj.prototype.bind("myEvent", function () { console.log("event triggered!!!");});
 
 	setTimeout(function() {obj.prototype.trigger("myEvent")}, 4000);

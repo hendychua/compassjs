@@ -1,4 +1,6 @@
-var Compass = function() {};
+(function() {
+
+var Compass = this.Compass = {};
 
 // Cached regular expressions for matching named param parts and splatted
 // parts of route strings.
@@ -79,8 +81,8 @@ var View = Compass.View = function(template) {
     }
 }
 
-var Events = Compass.Events = function() {
-    this.bind = function(params, callback) {
+var Events = Compass.Events = {
+    bind : function(params, callback) {
         var eventName = params.eventName;
         var event = {
             callback: callback
@@ -94,10 +96,10 @@ var Events = Compass.Events = function() {
         var events = this._events[eventName];
         events.push(event);
         return this; // returning this to facilitate chaining
-    };
+    },
 
     //name of event to trigger
-    this.trigger = function(params) {
+    trigger : function(params) {
         if (!this._events) return this;
         var events = this._events[params.eventName];
         //trigger events
@@ -106,7 +108,7 @@ var Events = Compass.Events = function() {
             events[i].callback();
         }
         return this;
-    };
+    }
 }
 
 var Collection = Compass.Collection = function(model) {
@@ -287,3 +289,5 @@ var Model = Compass.Model = function(url) {
         }
     };
 };
+
+}).call(this);
