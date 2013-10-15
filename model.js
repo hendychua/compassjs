@@ -99,16 +99,24 @@
 
     var View = Compass.View = function(params) {
         this.model = null;
+		this.element = null;
         this.template = params.template;
+		
         this.prototype = this.Events;
 
         this.bindModel = function(model) {
             this.model = model;
         };
+		
+		this.bindElement = function(element) {
+            this.element = element;
+        };
+		
         this.render = function() {
             var template = _.template(this.template.html(), {
                 model: this.model
             });
+			$(this.element).append(template);
             return template;
         };
 
