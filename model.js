@@ -3,18 +3,18 @@ var Compass = function() {};
 // Cached regular expressions for matching named param parts and splatted
 // parts of route strings.
 var optionalParam = /\((.*?)\)/g;
-var namedParam    = /(\(\?)?:\w+/g;
-var splatParam    = /\*\w+/g;
-var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+var namedParam = /(\(\?)?:\w+/g;
+var splatParam = /\*\w+/g;
+var escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 
 function _routeToRegExp(route) {
-     route = route.replace(escapeRegExp, '\\$&')
-                  .replace(optionalParam, '(?:$1)?')
-                  .replace(namedParam, function(match, optional){
-                    return optional ? match : '([^\/]+)';
-                  })
-                  .replace(splatParam, '(.*?)');
-     return new RegExp('^' + route + '$');
+    route = route.replace(escapeRegExp, '\\$&')
+        .replace(optionalParam, '(?:$1)?')
+        .replace(namedParam, function(match, optional) {
+            return optional ? match : '([^\/]+)';
+        })
+        .replace(splatParam, '(.*?)');
+    return new RegExp('^' + route + '$');
 }
 
 var Router = Compass.Router = function(routes) {
@@ -34,8 +34,8 @@ var Router = Compass.Router = function(routes) {
             appRouterInstance._route();
         })
     },
-    this._route = function () {
-        var chosenHandlerName= null;
+    this._route = function() {
+        var chosenHandlerName = null;
         var originalRoute = null;
         for (var i in this.routesRegex) {
             if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
@@ -50,7 +50,7 @@ var Router = Compass.Router = function(routes) {
             handler(params);
         }
     },
-    this._extractParameters = function (originalRoute, currentRoute) {
+    this._extractParameters = function(originalRoute, currentRoute) {
         // a simplistic way to split url and extract params
         // whatever starts with ":" is treated as a param
         var originalTokens = originalRoute.split("/");
@@ -72,15 +72,19 @@ var View = Compass.View = function(template) {
         this.model = model;
     },
     this.render = function() {
-        var template = _.template(this.template.html(), {model: this.model});
+        var template = _.template(this.template.html(), {
+            model: this.model
+        });
         return template;
     }
 }
 
 var Events = Compass.Events = function() {
-    this.bind = function (params, callback) {
+    this.bind = function(params, callback) {
         var eventName = params.eventName;
-        var event = {callback: callback};
+        var event = {
+            callback: callback
+        };
         if (typeof this._events == "undefined") {
             this._events = {};
         }
@@ -93,7 +97,7 @@ var Events = Compass.Events = function() {
     };
 
     //name of event to trigger
-    this.trigger = function (params) {
+    this.trigger = function(params) {
         if (!this._events) return this;
         var events = this._events[params.eventName];
         //trigger events
@@ -106,7 +110,7 @@ var Events = Compass.Events = function() {
 }
 
 var Collection = Compass.Collection = function(model) {
-    this.model = function(){};
+    this.model = function() {};
     this.model.prototype = model.prototype;
     this.list = [];
     this.get = function(params) {
@@ -119,11 +123,11 @@ var Collection = Compass.Collection = function(model) {
         }
         $.ajax({
             url: useUrl,
-            type: 'get', 
+            type: 'get',
             data: additionalParams,
             context: this,
             error: function(jqxhr, textStatus, error) {
-                console.log("error: "+error);
+                console.log("error: " + error);
             },
             success: function(data, textStatus, jqxhr) {
                 for (var i in data) {
@@ -145,17 +149,17 @@ var Model = Compass.Model = function(url) {
         var id = params.id;
         var callback = params.success;
         $.ajax({
-            url: this.url+"/"+id,
+            url: this.url + "/" + id,
             type: 'get',
             context: this,
             error: function(jqxhr, textStatus, error) {
-                console.log("error: "+error);
+                console.log("error: " + error);
             },
             success: function(data, textStatus, jqxhr) {
                 this.obj = data;
                 callback(data);
             }
-        });                        
+        });
     };
     this.save = function(params) {
         var customUrl = params.customUrl;
@@ -177,7 +181,7 @@ var Model = Compass.Model = function(url) {
                 contentType: false,
                 processData: false,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: "+error);
+                    console.log("error: " + error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
@@ -193,28 +197,28 @@ var Model = Compass.Model = function(url) {
                 context: this,
                 data: this.obj,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: "+error);
+                    console.log("error: " + error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
                     callback(data);
                 }
             });
-            
+
         }
     };
     this.sync = function(params) {
         var customUrl = params.customUrl;
-        var endpointId = params.id;        
+        var endpointId = params.id;
         var callback = params.success;
         var useUrl = this.url;
         if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
-            useUrl = useUrl+"/"+endpointId;
+            useUrl = useUrl + "/" + endpointId;
         } else {
-            useUrl = useUrl+"/"+this.obj.id;
+            useUrl = useUrl + "/" + this.obj.id;
         }
         // allow user to post with files with FormData
         // if formData attribute is set and is of the FormData type,
@@ -229,7 +233,7 @@ var Model = Compass.Model = function(url) {
                 contentType: false,
                 processData: false,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: "+error);
+                    console.log("error: " + error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj.formData = null;
@@ -243,7 +247,7 @@ var Model = Compass.Model = function(url) {
                 context: this,
                 data: this.obj,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: "+error);
+                    console.log("error: " + error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     callback(data);
@@ -253,18 +257,18 @@ var Model = Compass.Model = function(url) {
     };
     this.destroy = function(params) {
         var customUrl = params.customUrl;
-        var endpointId = params.id;        
+        var endpointId = params.id;
         var callback = params.success;
         var useUrl = this.url;
         if (typeof customUrl != "undefined") {
             useUrl = customUrl;
         }
         if (typeof endpointId != 'undefined') {
-            useUrl = useUrl+"/"+endpointId;
+            useUrl = useUrl + "/" + endpointId;
         } else {
-            useUrl = useUrl+"/"+this.obj.id;
+            useUrl = useUrl + "/" + this.obj.id;
         }
-        if (typeof this.obj.id == "undefined" ) {
+        if (typeof this.obj.id == "undefined") {
             this.obj = {};
         } else {
             $.ajax({
@@ -273,7 +277,7 @@ var Model = Compass.Model = function(url) {
                 context: this,
                 data: this.obj,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: "+error);
+                    console.log("error: " + error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = {};
