@@ -67,20 +67,6 @@
         }
     }
 
-    var View = Compass.View = function(template) {
-        this.model = null;
-        this.template = template;
-        this.bindModel = function(model) {
-            this.model = model;
-        },
-        this.render = function() {
-            var template = _.template(this.template.html(), {
-                model: this.model
-            });
-            return template;
-        }
-    }
-
     var Events = Compass.Events = {
         bind: function(params, callback) {
             var eventName = params.eventName;
@@ -110,6 +96,39 @@
             return this;
         }
     }
+
+    var View = Compass.View = function(params) {
+        this.model = null;
+        this.template = params.template;
+        this.prototype = this.Events;
+
+        this.bindModel = function(model) {
+            this.model = model;
+        };
+        this.render = function() {
+            var template = _.template(this.template.html(), {
+                model: this.model
+            });
+            return template;
+        };
+
+        this.delegateEvents = function() {
+            var delegateEventSplitter = /^(\S+)\s*(.*)$/;
+            if (params.events) {
+                var events = params.events;
+                console.log(events);
+                for (var key in events) {
+                    var method = events[key];
+                    if (!_.isFunction(method)) method = this[events[key]];
+                    if (!method) continue;
+                    var match = key.match(delegateEventSplitter);
+                    var eventName = match[1],
+                        selector = match[2];
+                    $(selector).on(eventName, method);
+                }
+            }
+        }
+    };
 
     var Collection = Compass.Collection = function(model) {
         this.model = function() {};

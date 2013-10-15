@@ -19,7 +19,7 @@
     <script type="text/template" id="single-movie-template">
         <h3><%= model.title %></h3>
         <h6><%= model.summary %></h6>
-        <img src="<%= model.img_url %>">
+        <img class="myImage" src="<%= model.img_url %>">
     </script>
     
     <script type="text/template" id="list-movies-template">
@@ -39,11 +39,21 @@
     var Movie = function(){};
     Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
 
+
     var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View($("#single-movie-template"));
+    SingleMovieView.prototype = new Compass.View({
+        template: $("#single-movie-template"),
+        events: {
+            "click .myImage": function updateMovieEvent() {
+                console.log("movie updated");
+            }
+        }
+    });
     
     var ListMoviesView = function(){};
-    ListMoviesView.prototype = new Compass.View($("#list-movies-template"));
+    ListMoviesView.prototype = new Compass.View({
+        template: $("#list-movies-template")
+    });
     
     var firstMovie = new Movie;
     var firstMovieView = new SingleMovieView;
@@ -51,7 +61,8 @@
         id: "4.json",
         success: function(data) {
             firstMovieView.bindModel(data);
-            $("body").append(firstMovieView.render());        
+            $("body").append(firstMovieView.render());
+            firstMovieView.delegateEvents();        
         }
     });
     
