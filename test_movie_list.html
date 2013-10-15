@@ -56,9 +56,9 @@
 			<p>
                 avg score: 
 				<%if (movie.obj.avg_score != null) { %>
-					0.0
-				<%} else {%>
 					<%=Math.round(movie.obj.avg_score  * 100) / 100%>
+				<%} else {%>
+					0.0
 				<%}%>
 			</p>
 		</div>
