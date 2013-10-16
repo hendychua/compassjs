@@ -315,6 +315,13 @@
                 });
             }
         };
-    };
+		this.set = function(params) {
+			var inputtedContent = params;
+			var key;
+			for (key in inputtedContent) {
+				this.obj[key] = inputtedContent[key];
+			}
+		}
+	};
 
 }).call(this);
