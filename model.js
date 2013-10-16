@@ -20,36 +20,47 @@
     }
 
     var Router = Compass.Router = function(routes) {
-        this.originalRoutes = [];
-        this.handlerName = [];
-        this.handlers = routes.handlers;
-        this.routesRegex = [];
-        for (var key in routes.routes) {
-            this.handlerName.push(routes.routes[key]);
-            this.originalRoutes.push(key);
-            var regex = _routeToRegExp(key);
-            this.routesRegex.push(regex);
-        }
-        this.start = function() {
-            var appRouterInstance = this;
-            $(window).on("hashchange", function() {
-                appRouterInstance._route();
-            })
-        },
+        // this.originalRoutes = [];
+        // this.handlerName = [];
+        // this.handlers = routes.handlers;
+        // this.routesRegex = [];
+        this.routes = routes;
+        
+        // this.start = function() {
+            // var appRouterInstance = this;
+            // $(window).on("hashchange", function() {
+            //     appRouterInstance._route();
+            // })
+        // },
         this._route = function() {
-            var chosenHandlerName = null;
-            var originalRoute = null;
-            for (var i in this.routesRegex) {
-                if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
-                    chosenHandlerName = this.handlerName[i];
-                    originalRoute = this.originalRoutes[i];
-                    break;
-                }
-            }
-            if (chosenHandlerName != null) {
-                var handler = this.handlers[chosenHandlerName];
-                var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
-                handler(params);
+            // var chosenHandlerName = null;
+            // var originalRoute = null;
+            // for (var i in this.routesRegex) {
+            //     if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
+            //         chosenHandlerName = this.handlerName[i];
+            //         originalRoute = this.originalRoutes[i];
+            //         break;
+            //     }
+            // }
+            // if (chosenHandlerName != null) {
+            //     var handler = this.handlers[chosenHandlerName];
+            //     var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
+            //     handler(params);
+            // }
+
+            var router = this;
+            var key;
+
+            for (key in routes.routes) {
+                Compass.History.route(key, _routeToRegExp(key), function(originalRoute){
+                    var params = router._extractParameters(originalRoute, Compass.History.getHash());
+                    var handlerName = router.routes.routes[originalRoute];
+                    router.routes.handlers[handlerName](params);
+                });
+                // this.handlerName.push(routes.routes[key]);
+                // this.originalRoutes.push(key);
+                // var regex = _routeToRegExp(key);
+                // this.routesRegex.push(regex);
             }
         },
         this._extractParameters = function(originalRoute, currentRoute) {
@@ -67,22 +78,49 @@
         }
     }
 
-    var Histoy = Compass.History = function(){
-        this.start = function(){
+    var Histoy = Compass.History = {
+        routeHandlers: [],
+        started: false,
 
-        }
+        start: function(){
+            if(this.started) console.log("History has been started!");
+            else $(window).on("hashchange", this.loadUrl);
+        },
 
-        this.route = function(){
+        route: function(originalRoute, routeRegex, handler){
+            this.routeHandlers.unshift({originalRoute: originalRoute, routeRegex: routeRegex, handler:handler});
+        },
 
-        }
+        getHash: function(){
+            var urlRegex = window.location.href.match(/#(.*)$/);
+            if(urlRegex) return urlRegex[1];
+            else return "";
+        },
 
-        this.checkUrl = function(){
-            
-        }
+        checkUrl: function(url, urlRegex){
+            return urlRegex.test(url);
+        },
 
-        this.loadUrl = function(){
+        loadUrl: function(){
+            var i;
+            var self = Compass.History;
+            var currentUrl = self.getHash();
 
-        }
+            for(i = 0; i < self.routeHandlers.length; i++){
+                if(self.checkUrl(currentUrl,self.routeHandlers[i]["routeRegex"])){
+                    Compass.History.routeHandlers[i]["handler"]
+                        (Compass.History.routeHandlers[i]["originalRoute"]);
+                }
+
+                // console.log(currentUrl);
+                // console.log(Compass.History.routeHandlers[i]["routeRegex"]);
+            }
+        },
+
+        stop: function(){
+            $(window).off("hashchange", this.loadUrl);
+            this.started = false;
+        },
     }
 
     var Events = Compass.Events = {
