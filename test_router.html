@@ -27,7 +27,7 @@
         routes: {
             "" : "index",
             "movies/:id" : "view_movie",
-            "movies/:id/reviews/:rid" : "view_movie_review",
+            "movies/:id/reviews/:rid" : "view_movie_review"
         },
         handlers: {
             index: function() {
@@ -50,7 +50,6 @@
             }
         }
     });
-    AppRouter.handlers.index();
     AppRouter.start();
 </script>
 </html>

@@ -13,9 +13,9 @@
 	<script type="text/javascript">
 	var obj = {};
 	obj.prototype = Compass.Events;
-	obj.bind("myEvent", function () { console.log("event triggered!!!");});
+	obj.prototype.bind("myEvent", function () { console.log("event triggered!!!");});
 
-	setTimeout(function() {obj.trigger("myEvent")}, 4000);
+	setTimeout(function() {obj.prototype.trigger("myEvent")}, 4000);
 	</script>
 </body>
 </html>
