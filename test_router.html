@@ -21,7 +21,7 @@
     Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
 
     var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View($("#single-movie-template"));
+    SingleMovieView.prototype = new Compass.View({template: $("#single-movie-template")});
 
     var AppRouter = new Compass.Router({
         routes: {
