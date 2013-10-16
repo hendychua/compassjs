@@ -32,6 +32,7 @@
         }
         this.start = function() {
             var appRouterInstance = this;
+            appRouterInstance._route();
             $(window).on("hashchange", function() {
                 appRouterInstance._route();
             })
