@@ -67,6 +67,24 @@
         }
     }
 
+    var Histoy = Compass.History = function(){
+        this.start = function(){
+
+        }
+
+        this.route = function(){
+
+        }
+
+        this.checkUrl = function(){
+            
+        }
+
+        this.loadUrl = function(){
+
+        }
+    }
+
     var Events = Compass.Events = {
         bind: function(params, callback) {
             var eventName = params.eventName;
