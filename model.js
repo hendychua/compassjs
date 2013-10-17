@@ -263,10 +263,12 @@
                 }
             });
         };
-		
-		
-		
         this.save = function(params) {
+			var customUrl = params.customUrl;
+            var useUrl = this.url;
+            if (typeof customUrl != "undefined") {
+                useUrl = customUrl;
+            }
 			var doIfSuccess;
 			var doIfError;
 			var formData = new FormData();
@@ -293,7 +295,7 @@
             $.ajax({
                 type: 'post',
                 async: false,
-                url: this.url,
+                url: useUrl,
                 context: this,
 				data: formData,
 				contentType: false,
@@ -307,7 +309,17 @@
             });
         };
         this.sync = function(params) {
-			var endpointId = params.id;
+            var customUrl = params.customUrl;
+            var endpointId = params.id;
+            var useUrl = this.url;
+            if (typeof customUrl != "undefined") {
+                useUrl = customUrl;
+            }
+            if (typeof endpointId != 'undefined') {
+                useUrl = useUrl + "/" + endpointId;
+            } else {
+                useUrl = useUrl + "/" + this.obj.id;
+            }
 			var doIfSuccess;
 			var doIfError;
 			var formData = new FormData();
@@ -333,7 +345,7 @@
 			}
             $.ajax({
                 type: 'put',
-                url: this.url+ "/" + endpointId,
+                url: useUrl,
                 context: this,
                 data: this.formData,
 				contentType: false,
@@ -347,6 +359,17 @@
             });
         };
         this.destroy = function(params) {
+		    var customUrl = params.customUrl;
+            var endpointId = params.id;
+            var useUrl = this.url;
+            if (typeof customUrl != "undefined") {
+                useUrl = customUrl;
+            }
+            if (typeof endpointId != 'undefined') {
+                useUrl = useUrl + "/" + endpointId;
+            } else {
+                useUrl = useUrl + "/" + this.obj.id;
+            }
             var endpointId = params.id;
             var doIfSuccess;
 			var doIfError;
@@ -369,7 +392,7 @@
             
             $.ajax({
                 type: 'delete',
-                url: this.url+ "/" + endpointId,
+                url: useUrl,
                 context: this,
                 data: this.obj,
                 error: function(jqxhr, textStatus, error) {
