@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Example: View, Model, Events</title>
+	<script src="../jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="../underscore.js" type="text/javascript"></script>
+	<script src="../model.js" type="text/javascript"></script>
+</head>
+<body>
+    
+    <script type="text/template" id="single-movie-template">
+        <h3><%= model.title %></h3>
+        <h6><%= model.summary %></h6>
+        <img class="myImage" src="<%= model.img_url %>">
+    </script>
+
+<script type="text/javascript">
+    /*
+        An example of using Model object to make API calls,
+        using View object to display them and attaching Events to the Views.
+    */
+    
+    var Movie = function(){};
+    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+
+    var SingleMovieView = function(){};
+    SingleMovieView.prototype = new Compass.View({
+        template: $("#single-movie-template"),
+        // To set up an event, use the events parameter.
+        // In the function that is going to be called, you will receive
+        // the bindedModel as a parameter.
+        events: {
+            "click .myImage": function movieClicked(bindedModel) {
+                console.log(bindedModel,"is clicked!");
+            }
+        }
+    });
+    
+    var firstMovie = new Movie;
+    var firstMovieView = new SingleMovieView;
+    firstMovie.get({
+        id: "4.json",
+        success: function(data) {
+            firstMovieView.bindModel(data);
+            $("body").append(firstMovieView.render());
+            firstMovieView.delegateEvents();        
+        }
+    });
+</script>
+</body>
+</html>

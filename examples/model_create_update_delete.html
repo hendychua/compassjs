@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Example: Model - create update delete</title>
+	<meta name="author" content="Hendy Chua">
+	<script src="../jquery-1.10.2.js" type="text/javascript"></script>
+	<script src="../model.js" type="text/javascript"></script>
+</head>
+<body>
+    <p>
+        <form enctype="multipart/form-data" name="movie">
+            <input type="text" required="true" size="30" name="movie[title]" id="movie_title" class="text_field"><br>
+            <input type="text" required="true" size="30" name="movie[summary]" id="movie_summary" class="text_field"><br>
+            <input type="file" required="true" name="movie[img]" id="movie_img"><br>
+            <a id="createMovieLink" href="#">Create Movie</a>
+        </form>
+    </p>
+    <p>
+        <a id="updateMoveLink" href="#">Update movie</a>
+    </p>
+    <p>
+        <a id="deleteMovieLink" href="#">Delete movie</a>
+    </p>
+<script type="text/javascript">
+
+    var access_token = '8dd06a5e2128361b9bfc42d1f60ed975'; // replace with your own access token
+    
+    // Creating a Movie model
+    var Movie = function(){};
+    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+    
+    var newMovie = new Movie;
+    // Creating a new movie
+    $("#createMovieLink").click(function() { 
+        newMovie.set({
+    		'access_token': access_token,
+    		'movie[title]': $("#movie_title").val(),
+    		'movie[summary]': $("#movie_summary").val(),
+    		'movie[img]': document.getElementById('movie_img').files[0]
+    	});
+    	newMovie.save({}); // pass an empty object if no params.
+    });
+    
+    // updating a movie
+    $("#updateMoveLink").click(function() { 
+        var movieToBeUpdated = new Movie;
+        movieToBeUpdated.get({
+            id: "447.json", // replace with an id of a movie that you are authorized to update
+            success: function(data) {
+                movieToBeUpdated.set({
+        	        'access_token': access_token,
+        			'movie[title]': $("#movie_title").val(),
+        			'movie[summary]': $("#movie_summary").val(),
+        			'movie[img]': document.getElementById('movie_img').files[0]
+        		});
+        		movieToBeUpdated.sync({
+        		    id: movieToBeUpdated.obj.id+".json",
+        		});
+            }
+        });
+    });
+    
+    // deleting a movie
+    $("#deleteMovieLink").click(function() { 
+        var movieToBeDeleted = new Movie;
+        movieToBeDeleted.get({
+            id: "447.json", // replace with an id of a movie that you are authorized to delete
+            success: function(data) {
+                movieToBeDeleted.set({
+        	        'access_token': access_token
+        		});
+        		movieToBeDeleted.destroy({
+        		    id: movieToBeDeleted.obj.id+".json",
+        		});
+            }
+        });
+    });
+    
+</script>
+</body>
+</html>

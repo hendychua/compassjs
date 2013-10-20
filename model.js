@@ -20,34 +20,9 @@
     }
 
     var Router = Compass.Router = function(routes) {
-        // this.originalRoutes = [];
-        // this.handlerName = [];
-        // this.handlers = routes.handlers;
-        // this.routesRegex = [];
         this.routes = routes;
-        
-        // this.start = function() {
-            // var appRouterInstance = this;
-            // $(window).on("hashchange", function() {
-            //     appRouterInstance._route();
-            // })
-        // },
-        this._route = function() {
-            // var chosenHandlerName = null;
-            // var originalRoute = null;
-            // for (var i in this.routesRegex) {
-            //     if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
-            //         chosenHandlerName = this.handlerName[i];
-            //         originalRoute = this.originalRoutes[i];
-            //         break;
-            //     }
-            // }
-            // if (chosenHandlerName != null) {
-            //     var handler = this.handlers[chosenHandlerName];
-            //     var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
-            //     handler(params);
-            // }
 
+        this._route = function() {
             var router = this;
             var key;
 
@@ -57,10 +32,6 @@
                     var handlerName = router.routes.routes[originalRoute];
                     router.routes.handlers[handlerName](params);
                 });
-                // this.handlerName.push(routes.routes[key]);
-                // this.originalRoutes.push(key);
-                // var regex = _routeToRegExp(key);
-                // this.routesRegex.push(regex);
             }
         },
         this._extractParameters = function(originalRoute, currentRoute) {
@@ -78,13 +49,16 @@
         }
     }
 
-    var Histoy = Compass.History = {
+    var History = Compass.History = {
         routeHandlers: [],
         started: false,
 
         start: function(){
             if(this.started) console.log("History has been started!");
-            else $(window).on("hashchange", this.loadUrl);
+            else {
+                this.loadUrl();
+                $(window).on("hashchange", this.loadUrl)
+            };
         },
 
         route: function(originalRoute, routeRegex, handler){
@@ -111,7 +85,6 @@
                     Compass.History.routeHandlers[i]["handler"]
                         (Compass.History.routeHandlers[i]["originalRoute"]);
                 }
-
                 // console.log(currentUrl);
                 // console.log(Compass.History.routeHandlers[i]["routeRegex"]);
             }
@@ -188,7 +161,10 @@
                     var match = key.match(delegateEventSplitter);
                     var eventName = match[1],
                         selector = match[2];
-                    $(selector).on(eventName, method);
+                    var bindedModel = this.model;
+                    $(selector).on(eventName, function() {
+                        method(bindedModel);
+                    });
                 }
             }
         }
@@ -201,8 +177,25 @@
         this.get = function(params) {
             var customUrl = params.customUrl;
             var additionalParams = params.additionalParams;
-            var callback = params.success;
             var useUrl = this.model.url;
+            var doIfSuccess;
+			var doIfError;
+			if (params.success==null) {
+				doIfSuccess = function(message){
+					console.log("collection get success");
+					console.log(message);
+				}
+			} else {
+				doIfSuccess = params.success;
+			}
+			if (params.error==null) {
+				doIfError = function(message){
+					console.log("collection get error");
+					console.log(message);
+				}
+			} else {
+				doIfError = params.error;
+			}
             if (typeof customUrl != "undefined") {
                 useUrl = customUrl;
             }
@@ -213,6 +206,7 @@
                 context: this,
                 error: function(jqxhr, textStatus, error) {
                     console.log("error: " + error);
+                    doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     for (var i in data) {
@@ -221,7 +215,7 @@
                         model.obj = datum;
                         this.list.push(model);
                     }
-                    callback(this.list);
+                    doIfSuccess(this.list);
                 }
             });
         };
@@ -255,7 +249,7 @@
                 type: 'get',
                 context: this,
                 error: function(jqxhr, textStatus, error) {
-                    doIfError(error);
+                    doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
@@ -279,7 +273,6 @@
 			if (params.success==null) {
 				doIfSuccess = function(message){
 					console.log("MODEL SAVE SUCCESS");
-					console.log(message);
 				}
 			} else {
 				doIfSuccess = params.success;
@@ -287,7 +280,6 @@
 			if (params.error==null) {
 				doIfError = function(message){
 					console.log("MODEL SAVE ERROR");
-					console.log(message);
 				}
 			} else {
 				doIfError = params.error;
@@ -301,7 +293,7 @@
 				contentType: false,
                 processData: false,
                 error: function(jqxhr, textStatus, error) {
-                    doIfError(error);
+                    doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     doIfSuccess(data);
@@ -347,11 +339,11 @@
                 type: 'put',
                 url: useUrl,
                 context: this,
-                data: this.formData,
+                data: formData,
 				contentType: false,
                 processData: false,
                 error: function(jqxhr, textStatus, error) {
-                    doIfError(error);
+                    doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     doIfSuccess(data);
@@ -397,10 +389,11 @@
                 data: this.obj,
                 error: function(jqxhr, textStatus, error) {
                     console.log("error: " + error);
+                    doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = {};
-                    callback(data);
+                    doIfSuccess(data);
                 }
             });
         };
