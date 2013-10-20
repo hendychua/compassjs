@@ -20,37 +20,47 @@
     }
 
     var Router = Compass.Router = function(routes) {
-        this.originalRoutes = [];
-        this.handlerName = [];
-        this.handlers = routes.handlers;
-        this.routesRegex = [];
-        for (var key in routes.routes) {
-            this.handlerName.push(routes.routes[key]);
-            this.originalRoutes.push(key);
-            var regex = _routeToRegExp(key);
-            this.routesRegex.push(regex);
-        }
-        this.start = function() {
-            var appRouterInstance = this;
-            appRouterInstance._route();
-            $(window).on("hashchange", function() {
-                appRouterInstance._route();
-            })
-        },
+        // this.originalRoutes = [];
+        // this.handlerName = [];
+        // this.handlers = routes.handlers;
+        // this.routesRegex = [];
+        this.routes = routes;
+        
+        // this.start = function() {
+            // var appRouterInstance = this;
+            // $(window).on("hashchange", function() {
+            //     appRouterInstance._route();
+            // })
+        // },
         this._route = function() {
-            var chosenHandlerName = null;
-            var originalRoute = null;
-            for (var i in this.routesRegex) {
-                if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
-                    chosenHandlerName = this.handlerName[i];
-                    originalRoute = this.originalRoutes[i];
-                    break;
-                }
-            }
-            if (chosenHandlerName != null) {
-                var handler = this.handlers[chosenHandlerName];
-                var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
-                handler(params);
+            // var chosenHandlerName = null;
+            // var originalRoute = null;
+            // for (var i in this.routesRegex) {
+            //     if (this.routesRegex[i].test(window.location.hash.substring(1)) == true) {
+            //         chosenHandlerName = this.handlerName[i];
+            //         originalRoute = this.originalRoutes[i];
+            //         break;
+            //     }
+            // }
+            // if (chosenHandlerName != null) {
+            //     var handler = this.handlers[chosenHandlerName];
+            //     var params = this._extractParameters(originalRoute, window.location.hash.substring(1));
+            //     handler(params);
+            // }
+
+            var router = this;
+            var key;
+
+            for (key in routes.routes) {
+                Compass.History.route(key, _routeToRegExp(key), function(originalRoute){
+                    var params = router._extractParameters(originalRoute, Compass.History.getHash());
+                    var handlerName = router.routes.routes[originalRoute];
+                    router.routes.handlers[handlerName](params);
+                });
+                // this.handlerName.push(routes.routes[key]);
+                // this.originalRoutes.push(key);
+                // var regex = _routeToRegExp(key);
+                // this.routesRegex.push(regex);
             }
         },
         this._extractParameters = function(originalRoute, currentRoute) {
@@ -66,6 +76,51 @@
             }
             return params;
         }
+    }
+
+    var Histoy = Compass.History = {
+        routeHandlers: [],
+        started: false,
+
+        start: function(){
+            if(this.started) console.log("History has been started!");
+            else $(window).on("hashchange", this.loadUrl);
+        },
+
+        route: function(originalRoute, routeRegex, handler){
+            this.routeHandlers.unshift({originalRoute: originalRoute, routeRegex: routeRegex, handler:handler});
+        },
+
+        getHash: function(){
+            var urlRegex = window.location.href.match(/#(.*)$/);
+            if(urlRegex) return urlRegex[1];
+            else return "";
+        },
+
+        checkUrl: function(url, urlRegex){
+            return urlRegex.test(url);
+        },
+
+        loadUrl: function(){
+            var i;
+            var self = Compass.History;
+            var currentUrl = self.getHash();
+
+            for(i = 0; i < self.routeHandlers.length; i++){
+                if(self.checkUrl(currentUrl,self.routeHandlers[i]["routeRegex"])){
+                    Compass.History.routeHandlers[i]["handler"]
+                        (Compass.History.routeHandlers[i]["originalRoute"]);
+                }
+
+                // console.log(currentUrl);
+                // console.log(Compass.History.routeHandlers[i]["routeRegex"]);
+            }
+        },
+
+        stop: function(){
+            $(window).off("hashchange", this.loadUrl);
+            this.started = false;
+        },
     }
 
     var Events = Compass.Events = {
@@ -100,16 +155,24 @@
 
     var View = Compass.View = function(params) {
         this.model = null;
+		this.element = null;
         this.template = params.template;
+		
         this.prototype = this.Events;
 
         this.bindModel = function(model) {
             this.model = model;
         };
+		
+		this.bindElement = function(element) {
+            this.element = element;
+        };
+		
         this.render = function() {
             var template = _.template(this.template.html(), {
                 model: this.model
             });
+			$(this.element).append(template);
             return template;
         };
 
@@ -168,71 +231,86 @@
         this.url = url;
         this.obj = {};
         this.get = function(params) {
-            var id = params.id;
-            var callback = params.success;
+		    var id = params.id;
+			var doIfSuccess;
+			var doIfError;
+			if (params.success==null) {
+				doIfSuccess = function(message){
+					console.log("MODEL GET SUCCESS");
+					console.log(message);
+				}
+			} else {
+				doIfSuccess = params.success;
+			}
+			if (params.error==null) {
+				doIfError = function(message){
+					console.log("MODEL GET ERROR");
+					console.log(message);
+				}
+			} else {
+				doIfError = params.error;
+			}
             $.ajax({
                 url: this.url + "/" + id,
                 type: 'get',
                 context: this,
                 error: function(jqxhr, textStatus, error) {
-                    console.log("error: " + error);
+                    doIfError(error);
                 },
                 success: function(data, textStatus, jqxhr) {
                     this.obj = data;
-                    callback(data);
+                    doIfSuccess(data);
                 }
             });
         };
         this.save = function(params) {
-            var customUrl = params.customUrl;
-            var callback = params.success;
+			var customUrl = params.customUrl;
             var useUrl = this.url;
             if (typeof customUrl != "undefined") {
                 useUrl = customUrl;
             }
-            // allow user to post with files with FormData
-            // if formData attribute is set and is of the FormData type,
-            // we will use it to post to the server
-            // else we use normal key-value pairs to post
-            if (this.obj.formData instanceof FormData) {
-                $.ajax({
-                    type: 'post',
-                    url: useUrl,
-                    context: this,
-                    data: this.obj.formData,
-                    contentType: false,
-                    processData: false,
-                    error: function(jqxhr, textStatus, error) {
-                        console.log("error: " + error);
-                    },
-                    success: function(data, textStatus, jqxhr) {
-                        this.obj = data;
-                        this.obj.formData = null;
-                        callback(data);
-                    }
-                });
-            } else {
-                $.ajax({
-                    type: 'post',
-                    async: false,
-                    url: useUrl,
-                    context: this,
-                    data: this.obj,
-                    error: function(jqxhr, textStatus, error) {
-                        console.log("error: " + error);
-                    },
-                    success: function(data, textStatus, jqxhr) {
-                        this.obj = data;
-                        callback(data);
-                    }
-                });
-
-            }
+			var doIfSuccess;
+			var doIfError;
+			var formData = new FormData();
+			var key;
+			for (key in this.obj) {
+				formData.append(key,this.obj[key]);
+			}
+			if (params.success==null) {
+				doIfSuccess = function(message){
+					console.log("MODEL SAVE SUCCESS");
+					console.log(message);
+				}
+			} else {
+				doIfSuccess = params.success;
+			}
+			if (params.error==null) {
+				doIfError = function(message){
+					console.log("MODEL SAVE ERROR");
+					console.log(message);
+				}
+			} else {
+				doIfError = params.error;
+			}
+            $.ajax({
+                type: 'post',
+                async: false,
+                url: useUrl,
+                context: this,
+				data: formData,
+				contentType: false,
+                processData: false,
+                error: function(jqxhr, textStatus, error) {
+                    doIfError(error);
+                },
+                success: function(data, textStatus, jqxhr) {
+                    doIfSuccess(data);
+                }
+            });
         };
         this.sync = function(params) {
             var customUrl = params.customUrl;
             var endpointId = params.id;
-            var callback = params.success;
             var useUrl = this.url;
             if (typeof customUrl != "undefined") {
                 useUrl = customUrl;
@@ -242,45 +320,47 @@
             } else {
                 useUrl = useUrl + "/" + this.obj.id;
             }
-            // allow user to post with files with FormData
-            // if formData attribute is set and is of the FormData type,
-            // we will use it to post to the server
-            // else we use normal key-value pairs to post
-            if (this.obj.formData instanceof FormData) {
-                $.ajax({
-                    type: 'put',
-                    url: useUrl,
-                    context: this,
-                    data: this.obj.formData,
-                    contentType: false,
-                    processData: false,
-                    error: function(jqxhr, textStatus, error) {
-                        console.log("error: " + error);
-                    },
-                    success: function(data, textStatus, jqxhr) {
-                        this.obj.formData = null;
-                        callback(data);
-                    }
-                });
-            } else {
-                $.ajax({
-                    type: 'put',
-                    url: useUrl,
-                    context: this,
-                    data: this.obj,
-                    error: function(jqxhr, textStatus, error) {
-                        console.log("error: " + error);
-                    },
-                    success: function(data, textStatus, jqxhr) {
-                        callback(data);
-                    }
-                });
-            }
+			var doIfSuccess;
+			var doIfError;
+			var formData = new FormData();
+			var key;
+			for (key in this.obj) {
+				formData.append(key,this.obj[key]);
+			}
+			if (params.success==null) {
+				doIfSuccess = function(message){
+					console.log("MODEL SYNC SUCCESS");
+					console.log(message);
+				}
+			} else {
+				doIfSuccess = params.success;
+			}
+			if (params.error==null) {
+				doIfError = function(message){
+					console.log("MODEL SYNC ERROR");
+					console.log(message);
+				}
+			} else {
+				doIfError = params.error;
+			}
+            $.ajax({
+                type: 'put',
+                url: useUrl,
+                context: this,
+                data: this.formData,
+				contentType: false,
+                processData: false,
+                error: function(jqxhr, textStatus, error) {
+                    doIfError(error);
+                },
+                success: function(data, textStatus, jqxhr) {
+                    doIfSuccess(data);
+                }
+            });
         };
         this.destroy = function(params) {
-            var customUrl = params.customUrl;
+		    var customUrl = params.customUrl;
             var endpointId = params.id;
-            var callback = params.success;
             var useUrl = this.url;
             if (typeof customUrl != "undefined") {
                 useUrl = customUrl;
@@ -290,24 +370,48 @@
             } else {
                 useUrl = useUrl + "/" + this.obj.id;
             }
-            if (typeof this.obj.id == "undefined") {
-                this.obj = {};
-            } else {
-                $.ajax({
-                    type: 'delete',
-                    url: useUrl,
-                    context: this,
-                    data: this.obj,
-                    error: function(jqxhr, textStatus, error) {
-                        console.log("error: " + error);
-                    },
-                    success: function(data, textStatus, jqxhr) {
-                        this.obj = {};
-                        callback(data);
-                    }
-                });
-            }
+            var endpointId = params.id;
+            var doIfSuccess;
+			var doIfError;
+			if (params.success==null) {
+				doIfSuccess = function(message){
+					console.log("MODEL DESTROY SUCCESS");
+					console.log(message);
+				}
+			} else {
+				doIfSuccess = params.success;
+			}
+			if (params.error==null) {
+				doIfError = function(message){
+					console.log("MODEL DESTROY ERROR");
+					console.log(message);
+				}
+			} else {
+				doIfError = params.error;
+			}
+            
+            $.ajax({
+                type: 'delete',
+                url: useUrl,
+                context: this,
+                data: this.obj,
+                error: function(jqxhr, textStatus, error) {
+                    console.log("error: " + error);
+                },
+                success: function(data, textStatus, jqxhr) {
+                    this.obj = {};
+                    callback(data);
+                }
+            });
         };
-    };
+		
+		this.set = function(params) {
+			var inputtedContent = params;
+			var key;
+			for (key in inputtedContent) {
+				this.obj[key] = inputtedContent[key];
+			}
+		}
+	};
 
 }).call(this);

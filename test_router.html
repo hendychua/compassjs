@@ -21,15 +21,13 @@
     Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
 
     var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View({
-        template: $("#single-movie-template")
-    });
+    SingleMovieView.prototype = new Compass.View({template: $("#single-movie-template")});
 
     var AppRouter = new Compass.Router({
         routes: {
             "" : "index",
             "movies/:id" : "view_movie",
-            "movies/:id/reviews/:rid" : "view_movie_review",
+            "movies/:id/reviews/:rid" : "view_movie_review"
         },
         handlers: {
             index: function() {
@@ -52,6 +50,7 @@
             }
         }
     });
-    AppRouter.start();
-</script>
+    AppRouter._route();
+    Compass.History.start();
+    </script>
 </html>
