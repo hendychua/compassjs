@@ -12,9 +12,7 @@ This is a project for CS3213 Software Systems Design.
 
 Dependencies:
 ============
-jquery-1.10.2
-underscore.js
-watch.js
+jquery-1.10.2, underscore.js, watch.js
 
 Team members:
 ============
@@ -26,7 +24,14 @@ Ivan<br>
 
 Examples:
 ===========
-You can find all the examples in the examples folder.
+You can find all the examples in the examples folder:
+
+1. view_model_events.html - Teaches you how to use the Model object to connect with a REST API, use a view to display the Model's data 
+and attaching events to the view.<br>
+2. view_model_collections.html - Teaches you how to use the Model object and the Collection object with Views.<br>
+3. router_view_model.html - Teaches you how to use the Router object to route different URLs to different handlers.<br>
+4. model_create_update_delete.html - Teaches you how to use the Model object to do CRUD operations.<br>
+5. view_model_data_observe.html - Teaches you how to do data-binding (when your model's data changes, you can specify handlers to update the views).<br>
 
 Documentation
 ===========
