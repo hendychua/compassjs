@@ -43,7 +43,9 @@
     firstMovie.get({
         id: "4.json",
         success: function(data) {
-            firstMovieView.bindModel(data);
+            firstMovieView.bindModel({
+                model: data
+            });
             $("body").append(firstMovieView.render());
             firstMovieView.delegateEvents();        
         }

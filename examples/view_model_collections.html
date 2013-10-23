@@ -60,7 +60,9 @@
     firstMovie.get({
         id: "4.json",
         success: function(data) {
-            firstMovieView.bindModel(data);
+            firstMovieView.bindModel({
+                model: data
+            });
             $("body").append(firstMovieView.render());
         },
         error: function(errorMsg) {
@@ -79,7 +81,9 @@
     secondMovie.get({
         id: "5.json",
         success: function(data) {
-            secondMovieView.bindModel(data);
+            secondMovieView.bindModel({
+                model: data
+            });
             secondMovieView.render();
         },
         error: function(errorMsg) {
@@ -102,7 +106,9 @@
         customUrl: "http://cs3213.herokuapp.com/movies.json",
         additionalParams: additionalParams,
         success: function(data) {
-            listMoviesView.bindModel(data);
+            listMoviesView.bindModel({
+                model: data
+            });
             $("#list_movies").append(listMoviesView.render());
         },
         error: function(error) {

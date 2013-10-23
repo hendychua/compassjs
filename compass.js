@@ -130,11 +130,15 @@
         this.model = null;
 		this.element = null;
         this.template = params.template;
-		
+        this.dataChangedHandlers = {};
+        		
         this.prototype = this.Events;
 
-        this.bindModel = function(model) {
-            this.model = model;
+        this.bindModel = function(params) {
+            this.model = params.model;
+            for (var key in params.observeData) {
+                watch(this.model, key , params.dataChangedHandlers[params.observeData[key]]);
+            }
         };
 		
 		this.bindElement = function(element) {

@@ -50,7 +50,9 @@
                 firstMovie.get({
                     id: params.id+".json",
                     success: function(data) {
-                        firstMovieView.bindModel(data);
+                        firstMovieView.bindModel({
+                            model: data
+                        });
                         $("body").append(firstMovieView.render());        
                     },
                     error: function(errorMsg) {
