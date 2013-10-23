@@ -10,6 +10,12 @@ Our goal is to make a framework that is much easier to use compared to Backbone.
 
 This is a project for CS3213 Software Systems Design.
 
+Dependencies:
+============
+jquery-1.10.2
+underscore.js
+watch.js
+
 Team members:
 ============
 Hendy Chua<br>
@@ -20,7 +26,7 @@ Ivan<br>
 
 Examples:
 ===========
-Please refer to the examples folder on how to use the framework.
+You can find all the examples in the examples folder.
 
 Documentation
 ===========
@@ -40,7 +46,7 @@ Please refer to the examples for parameters that can be passed in.
 
 A Compass Collection is a list of Models.
 
-A Compass View allows you to create templates, update your view with your model's data easily The dependency is underscorejs.
+A Compass View allows you to create templates, update your view with your model's data easily.
 
 A Compass Router helps you to define URL routes and map them to different method handlers in your project.
 
