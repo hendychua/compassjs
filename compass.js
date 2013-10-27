@@ -213,6 +213,7 @@
                     doIfError(textStatus+" "+error);
                 },
                 success: function(data, textStatus, jqxhr) {
+                    this.list = [];
                     for (var i in data) {
                         var datum = data[i];
                         var model = new this.model;
