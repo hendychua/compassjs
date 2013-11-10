@@ -126,10 +126,10 @@
         }
     }
 
-    var View = Compass.View = function(params) {
+    var View = Compass.View = function() {
         this.model = null;
 		this.element = null;
-        this.template = params.template;
+        
         this.dataChangedHandlers = {};
         		
         this.prototype = this.Events;
@@ -155,9 +155,8 @@
 
         this.delegateEvents = function() {
             var delegateEventSplitter = /^(\S+)\s*(.*)$/;
-            if (params.events) {
-                var events = params.events;
-                console.log(events);
+            if (this.events) {
+                var events = this.events;
                 for (var key in events) {
                     var method = events[key];
                     if (!_.isFunction(method)) method = this[events[key]];
@@ -171,12 +170,12 @@
                     });
                 }
             }
-        }
+        };
+
     };
 
-    var Collection = Compass.Collection = function(model) {
-        this.model = function() {};
-        this.model.prototype = model.prototype;
+    var Collection = Compass.Collection = function() {
+
         this.list = [];
         this.get = function(params) {
             var customUrl = params.customUrl;
@@ -226,8 +225,8 @@
         };
     }
 
-    var Model = Compass.Model = function(url) {
-        this.url = url;
+    var Model = Compass.Model = function() {
+        
         this.obj = {};
         this.get = function(params) {
 		    var id = params.id;
@@ -411,5 +410,40 @@
 			}
 		}
 	};
+
+    var extend = function(protoProps) {
+        var parent = this;
+        var child;
+        // The constructor function for the new subclass is either defined by you
+        // (the "constructor" property in your `extend` definition), or defaulted
+        // by us to simply call the parent's constructor.
+        if (protoProps && _.has(protoProps, 'constructor')) {
+            child = protoProps.constructor;
+        } else {
+            child = function() {
+                return parent.apply(this, arguments);
+            };
+        }
+
+        // Set the prototype chain to inherit from `parent`, without calling
+        // `parent`'s constructor function.
+        var Surrogate = function() {
+            this.constructor = child;
+        };
+        Surrogate.prototype = parent.prototype;
+        child.prototype = new Surrogate;
+
+        // Add prototype properties (instance properties) to the subclass,
+        // if supplied.
+        if (protoProps) _.extend(child.prototype, protoProps);
+
+        
+        child.__super__ = parent.prototype;
+
+        return child;
+    };
+
+  // Set up inheritance for the model, collection, router, view and history.
+  Model.extend = Collection.extend = View.extend = extend;
 
 }).call(this);

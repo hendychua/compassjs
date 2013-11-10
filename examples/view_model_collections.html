@@ -39,18 +39,17 @@
     */
     
     // First set up the Movie model.
-    var Movie = function(){};
-    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+    var Movie = Compass.Model.extend({
+        url: "http://cs3213.herokuapp.com/movies"
+    });
 
     // Set up a View. This view is for displaying one movie.
-    var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View({
+    var SingleMovieView = Compass.View.extend({
         template: $("#single-movie-template")
     });
 
     // Set up a View. This view is for displaying a list of movies.
-    var ListMoviesView = function(){};
-    ListMoviesView.prototype = new Compass.View({
+    var ListMoviesView = Compass.View.extend({
         template: $("#list-movies-template")
     });
     
@@ -94,8 +93,9 @@
     var listMoviesView = new ListMoviesView;
     
     // Constructing a Collection requires a Model object to be passed in.
-    var Movies = function(){};
-    Movies.prototype = new Compass.Collection(Movie);
+    var Movies = Compass.Collection.extend({
+        model: Movie
+    });
     
     var listOfMovies = new Movies;
     // You can also pass in additionalParams when getting a collections

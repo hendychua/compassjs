@@ -25,12 +25,14 @@
     */
     
     // First set up the Movie model.
-    var Movie = function(){};
-    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+    var Movie = Compass.Model.extend({
+        url: "http://cs3213.herokuapp.com/movies"
+    });
     
     // Set up the view with a template written in underscorejs.
-    var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View({template: $("#single-movie-template")});
+    var SingleMovieView = Compass.View.extend({
+        template: $("#single-movie-template")
+    });
     
     // Set up the router. The routes map a URL to a function name. You have to provide the functions
     // in the handlers parameter.

@@ -5,6 +5,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Example: Model - create update delete</title>
 	<meta name="author" content="Hendy Chua">
+	<script src="../underscore.js" type="text/javascript" charset="utf-8"></script>
 	<script src="../jquery-1.10.2.js" type="text/javascript"></script>
 	<script src="../compass.js" type="text/javascript"></script>
 </head>
@@ -25,11 +26,12 @@
     </p>
 <script type="text/javascript">
 
-    var access_token = '8dd06a5e2128361b9bfc42d1f60ed975'; // replace with your own access token
+    var access_token = 'cf0da8c12fac8ab061918d1b19c73629'; // replace with your own access token
     
     // Creating a Movie model
-    var Movie = function(){};
-    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+    var Movie = Compass.Model.extend({
+        url: "http://cs3213.herokuapp.com/movies"
+    });
     
     var newMovie = new Movie;
     // Creating a new movie
@@ -47,7 +49,7 @@
     $("#updateMoveLink").click(function() { 
         var movieToBeUpdated = new Movie;
         movieToBeUpdated.get({
-            id: "447.json", // replace with an id of a movie that you are authorized to update
+            id: "578.json", // replace with an id of a movie that you are authorized to update
             success: function(data) {
                 movieToBeUpdated.set({
         	        'access_token': access_token,
@@ -66,7 +68,7 @@
     $("#deleteMovieLink").click(function() { 
         var movieToBeDeleted = new Movie;
         movieToBeDeleted.get({
-            id: "447.json", // replace with an id of a movie that you are authorized to delete
+            id: "578.json", // replace with an id of a movie that you are authorized to delete
             success: function(data) {
                 movieToBeDeleted.set({
         	        'access_token': access_token

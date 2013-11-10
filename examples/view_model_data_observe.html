@@ -29,11 +29,11 @@
         and reflecting the change in the view.
     */
     
-    var Movie = function(){};
-    Movie.prototype = new Compass.Model("http://cs3213.herokuapp.com/movies");
+    var Movie = Compass.Model.extend({
+        url: "http://cs3213.herokuapp.com/movies"
+    });
 
-    var SingleMovieView = function(){};
-    SingleMovieView.prototype = new Compass.View({
+    var SingleMovieView = Compass.View.extend({
         template: $("#single-movie-template")
     });
     
