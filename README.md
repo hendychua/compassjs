@@ -17,10 +17,8 @@ jquery-1.10.2, underscore.js, watch.js
 Team members:
 ============
 Hendy Chua<br>
-Inian<br>
-Zaki<br>
-Edrick<br>
-Ivan<br>
+Inian Parameshwaran<br>
+Nur Muhammad Zaki Budiprasetya<br>
 
 Examples:
 ===========
