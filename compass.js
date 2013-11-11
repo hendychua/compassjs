@@ -290,7 +290,6 @@
 			}
             $.ajax({
                 type: 'post',
-                async: false,
                 url: useUrl,
                 context: this,
 				data: formData,
